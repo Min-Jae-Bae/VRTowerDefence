@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 //사용자의 마우스 입력에 따라 x,y 축을 회전하고 싶다.

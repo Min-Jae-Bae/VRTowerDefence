@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 //마우스 왼쪽버튼을 누르면 총을 쏘고싶다.
