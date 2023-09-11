@@ -31,6 +31,13 @@ public class PlayerFire : MonoBehaviour
                 //총알자국을 부딪힌 곳에 생성
                 bulletImpact.transform.position = hitInfo.point;
                 Destroy(bulletImpact, 2f);
+
+                //만약 닿은 것이 Enemy라면
+                if (hitInfo.transform.gameObject.layer == LayerMask.NameToLayer("Enemy"))
+                {
+                    //Enemy에게 "파괴되어줘" 라고 하고싶다.
+                    hitInfo.transform.GetComponent<Enemy>().DiePlz(1);
+                }
             }
         }
         else

@@ -17,11 +17,14 @@ public class Enemy : MonoBehaviour
         Move,
         Attack,
         Damage,
-        Die
+        Die,
+        FlyingDie
     }
 
     private void Start()
     {
+        droneOriginSize = drone.localScale;
+        droneOriginLocalPosition = drone.localPosition;
         agent = GetComponent<NavMeshAgent>();
 
         state = State.Search;
@@ -36,7 +39,13 @@ public class Enemy : MonoBehaviour
             case State.Attack: Attack(); break;
             case State.Damage: Damage(); break;
             case State.Die: Die(); break;
+            case State.FlyingDie: FlyingDie(); break;
         }
+    }
+
+    private void FlyingDie()
+    {
+        throw new NotImplementedException();
     }
 
     private void Search()
@@ -106,13 +115,76 @@ public class Enemy : MonoBehaviour
         }
     }
 
+    //데미지가 발생한 시간을 저장하고
+    // 그 시간으로부터 damageTime만큼 시간이 흘렀다면
+    private float damageMoments;
+
+    public float damageTime = 1;
+
     private void Damage()
     {
-        throw new NotImplementedException();
+        //시간이 흐르다가
+        currentTime += Time.deltaTime;
+        //시간이 흐르다가 정신차리는 시간이되면
+        if (Time.time - damageMoments > damageTime)
+        {
+            //이동을 재개하고싶다.
+            agent.isStopped = false;
+            //상태를 Move로 전이하고싶다.
+            state = State.Move;
+        }
     }
+
+    private HPBase hpBase;
+    public Transform drone;
+    private Vector3 droneOriginSize;
+    private Vector3 droneOriginLocalPosition;
 
     private void Die()
     {
-        throw new NotImplementedException();
+        // 1초 동안
+        currentTime += Time.deltaTime;
+        if (currentTime <= 1)
+        {
+            Vector3 targetScale = droneOriginSize * 2;
+            drone.localScale = Vector3.Lerp(droneOriginSize, targetScale, currentTime);
+            drone.localPosition = droneOriginLocalPosition + UnityEngine.Random.insideUnitSphere * 0.1f * currentTime;
+        }
+        else
+        {
+            // 1초 후에 펑 터지고 싶다.
+            Destroy(gameObject, 1);
+        }
+    }
+
+    public void DiePlz(int damage)
+    {
+        //이동을 정지하고싶다.
+        agent.isStopped = true;
+        if (hpBase == null) hpBase = GetComponent<HPBase>();
+
+        hpBase.HP -= damage;
+
+        if (hpBase.HP <= 0)
+        {
+            //죽음 상태로 전이하고
+            state = State.Die;
+            //정지하라
+            //1초 후에 파괴되고싶다.
+            Destroy(gameObject, 1);
+            if (damage == 1)
+            {
+                state = State.Die;
+            }
+            else
+            {
+                state = State.FlyingDie;
+            }
+        }
+        else
+        {
+            state = State.Damage;
+            damageMoments = Time.time;
+        }
     }
 }
