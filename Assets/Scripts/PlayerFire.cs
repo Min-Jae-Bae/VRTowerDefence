@@ -36,7 +36,7 @@ public class PlayerFire : MonoBehaviour
                 if (hitInfo.transform.gameObject.layer == LayerMask.NameToLayer("Enemy"))
                 {
                     //Enemy에게 "파괴되어줘" 라고 하고싶다.
-                    hitInfo.transform.GetComponent<Enemy>().DiePlz(1);
+                    hitInfo.transform.GetComponent<Enemy>().DiePlz(1, hand.transform.forward);
                 }
             }
         }

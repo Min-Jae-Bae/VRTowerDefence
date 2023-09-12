@@ -10,6 +10,7 @@ public class Enemy : MonoBehaviour
     private NavMeshAgent agent;
     public State state;
     public Transform firePosition;
+    public AnimationCurve animCurve;
 
     public enum State
     {
@@ -43,9 +44,16 @@ public class Enemy : MonoBehaviour
         }
     }
 
+    public GameObject destoryFactory;
+
     private void FlyingDie()
     {
-        throw new NotImplementedException();
+        currentTime += Time.deltaTime;
+        if (currentTime > 2)
+        {
+            Destroy(gameObject);
+            Instantiate(destoryFactory, drone.position, Quaternion.identity);
+        }
     }
 
     private void Search()
@@ -146,18 +154,20 @@ public class Enemy : MonoBehaviour
         currentTime += Time.deltaTime;
         if (currentTime <= 1)
         {
+            float t = animCurve.Evaluate(currentTime);
             Vector3 targetScale = droneOriginSize * 2;
-            drone.localScale = Vector3.Lerp(droneOriginSize, targetScale, currentTime);
+            drone.localScale = Vector3.Lerp(droneOriginSize, targetScale, t);
             drone.localPosition = droneOriginLocalPosition + UnityEngine.Random.insideUnitSphere * 0.1f * currentTime;
         }
         else
         {
             // 1초 후에 펑 터지고 싶다.
             Destroy(gameObject, 1);
+            Instantiate(destoryFactory, drone.position, Quaternion.identity);
         }
     }
 
-    public void DiePlz(int damage)
+    public void DiePlz(int damage, Vector3 origin)
     {
         //이동을 정지하고싶다.
         agent.isStopped = true;
@@ -167,11 +177,12 @@ public class Enemy : MonoBehaviour
 
         if (hpBase.HP <= 0)
         {
+            //충돌체를 비활성화 하고싶다.
+            GetComponent<Collider>().enabled = false;
             //죽음 상태로 전이하고
             state = State.Die;
-            //정지하라
-            //1초 후에 파괴되고싶다.
             Destroy(gameObject, 1);
+
             if (damage == 1)
             {
                 state = State.Die;
@@ -179,6 +190,12 @@ public class Enemy : MonoBehaviour
             else
             {
                 state = State.FlyingDie;
+                agent.enabled = false;
+                var rb = GetComponent<Rigidbody>();
+                if (rb == null) rb = gameObject.AddComponent<Rigidbody>();
+                Vector3 force = transform.position - origin;
+                force = Vector3.ClampMagnitude(force, 10);
+                rb.AddForceAtPosition(force, origin, ForceMode.Impulse);
             }
         }
         else

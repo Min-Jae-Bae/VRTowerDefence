@@ -83,6 +83,13 @@ MonoBehaviour:
   target: {fileID: 0}
   state: 0
   firePosition: {fileID: 81623227147294235}
+  animCurve:
+    serializedVersion: 2
+    m_Curve: []
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  destoryFactory: {fileID: 100008, guid: 2bc25c931bf045a40ac0e89b787b077a, type: 3}
   fireTime: 2
   bulletFactory: {fileID: 7305409562034253017, guid: e7d7a6edbdf1cbb449845c75605248ef, type: 3}
   damageTime: 1
