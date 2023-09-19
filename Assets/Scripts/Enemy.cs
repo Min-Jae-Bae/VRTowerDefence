@@ -1,4 +1,5 @@
 using System;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -59,7 +60,7 @@ public class Enemy : MonoBehaviour
     private void Search()
     {
         //Scene에 배치된 타워들을 모두 찾아서
-        GameObject[] towers = GameObject.FindGameObjectsWithTag("Tower");
+        Tower[] towers = GameObject.FindObjectsOfType<Tower>();
 
         //임시거리, 선택 배열 번호
         float tempDistance = float.MaxValue;
@@ -67,6 +68,9 @@ public class Enemy : MonoBehaviour
 
         for (int i = 0; i < towers.Length; i++)
         {
+            if (towers[i].HP <= 0) continue;
+
+            towerTarget = towers[i];
             //타워와 나와의 거리를 제고
             float temp = Vector3.Distance(towers[i].transform.position, transform.position);
             //그 거리가 최단거리보다 작다면
@@ -105,9 +109,16 @@ public class Enemy : MonoBehaviour
     private float currentTime;
     [SerializeField] private float fireTime = 2;
     public GameObject bulletFactory;
+    private Tower towerTarget;
 
     private void Attack()
     {
+        //만약 목표로하는 타워의 체력이 0이되면 검색상태로 전이하고 싶다.
+        if (towerTarget.HP <= 0)
+        {
+            state = State.Search;
+            return;
+        }
         //시간이 흐르다가
         currentTime += Time.deltaTime;
         //현재시간이 fireTime을 초과하면
@@ -119,7 +130,8 @@ public class Enemy : MonoBehaviour
             var enemyBullet = Instantiate(bulletFactory);
             //총알의 앞방향을 목적지를 향하는 방향(타겟 방향 - 나의 방향을 빼면 = 타겟 방향이다)으로 회전하고싶다.
             enemyBullet.transform.position = firePosition.position;
-            enemyBullet.transform.forward = target.position - firePosition.position + Vector3.up * 10f;
+            Vector3 dir = target.position - firePosition.position;
+            enemyBullet.transform.forward = dir + Vector3.up * 10f;
         }
     }
 

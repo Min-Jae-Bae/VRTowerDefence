@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 //마우스 왼쪽버튼을 누르면 총을 쏘고싶다.
@@ -7,6 +8,10 @@ public class PlayerFire : MonoBehaviour
     public Transform hand;
     public GameObject bulletImpactFactory;
     private LineRenderer lr;
+    public Camera cameraScope;
+    public float zoomOutFOV = 90f;
+    public float zoomInFOV = 15f;
+    public float zoomSpeed = 30f;
 
     private void Start()
     {
@@ -15,6 +20,7 @@ public class PlayerFire : MonoBehaviour
 
     private void Update()
     {
+        ZoomProcess();
         //만약 마우스 왼쪽버튼을 누르면
         //손위치에서 손의 앞방향으로 Ray를 만들고
         Ray ray = new Ray(hand.position, hand.forward);
@@ -25,7 +31,12 @@ public class PlayerFire : MonoBehaviour
         if (isHit)
         {
             lr.SetPosition(1, hitInfo.point);
+
+#if Oculus
+            if (OVRInput.GetDown(OVRInput.Button.One, OVRInput.Controller.RTouch))
+#else
             if (Input.GetButtonDown("Fire1"))
+#endif
             {                    //총알자국 생성
                 GameObject bulletImpact = Instantiate(bulletImpactFactory);
                 //총알자국을 부딪힌 곳에 생성
@@ -44,5 +55,14 @@ public class PlayerFire : MonoBehaviour
         {
             lr.SetPosition(1, ray.origin + ray.direction * 100f);
         }
+    }
+
+    private void ZoomProcess()
+    {
+        //컨트롤러의 thumbstick을 밀면 축소, 당기면 확대하고싶다. CameraScope의 FOV를 건드리겠다.
+        Vector2 axis = OVRInput.Get(OVRInput.Axis2D.PrimaryThumbstick, OVRInput.Controller.RTouch);
+
+        cameraScope.fieldOfView -= axis.y * zoomSpeed * Time.deltaTime;
+        cameraScope.fieldOfView = Mathf.Clamp(cameraScope.fieldOfView, zoomInFOV, zoomOutFOV);
     }
 }

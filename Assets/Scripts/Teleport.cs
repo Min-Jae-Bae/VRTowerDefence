@@ -44,12 +44,21 @@ public class Teleport : MonoBehaviour
             marker.localScale = Vector3.one * kAdjust * 100f;
         }
 
+#if Oculus
+        if (OVRInput.GetDown(OVRInput.Button.One, OVRInput.Controller.LTouch))
+#else
         if (Input.GetButtonDown("Fire2"))
+#endif
         {
             //¾îµò°¡ ºÎµúÈû
             lineRenderer.enabled = true;
         }
-        else if (Input.GetButtonUp("Fire2"))
+
+#if Oculus
+        else if (OVRInput.GetUp(OVRInput.Button.One, OVRInput.Controller.LTouch))
+#else
+            else if (Input.GetButtonUp("Fire2"))
+#endif
         {
             //¶¼¸é ¼±À» ¾Èº¸°í½Í´Ù.
             lineRenderer.enabled = false;
